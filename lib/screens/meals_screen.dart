@@ -1,12 +1,19 @@
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
+import '../services/firebase_service.dart';
 import '../models/meal.dart';
 import '../widgets/meal_card.dart';
 import 'meal_detail_screen.dart';
 
 class MealsScreen extends StatefulWidget {
   final String category;
-  MealsScreen({required this.category});
+  final FirebaseService firebaseService;
+
+  const MealsScreen({
+    Key? key,
+    required this.category,
+    required this.firebaseService,
+  }) : super(key: key);
 
   @override
   _MealsScreenState createState() => _MealsScreenState();
@@ -45,7 +52,8 @@ class _MealsScreenState extends State<MealsScreen> {
               onChanged: (v) async {
                 setState(() => query = v);
                 if (v.trim().isEmpty) {
-                  setState(() => mealsFuture = api.fetchMealsByCategory(widget.category));
+                  setState(() =>
+                  mealsFuture = api.fetchMealsByCategory(widget.category));
                 } else {
                   setState(() => mealsFuture = api.searchMeals(v));
                 }
@@ -59,7 +67,8 @@ class _MealsScreenState extends State<MealsScreen> {
         builder: (context, snapshot) {
           if (snapshot.connectionState != ConnectionState.done)
             return Center(child: CircularProgressIndicator());
-          if (snapshot.hasError) return Center(child: Text('Error: ${snapshot.error}'));
+          if (snapshot.hasError)
+            return Center(child: Text('Error: ${snapshot.error}'));
           final meals = snapshot.data ?? [];
           return GridView.builder(
             padding: EdgeInsets.all(8),
@@ -72,15 +81,21 @@ class _MealsScreenState extends State<MealsScreen> {
             itemCount: meals.length,
             itemBuilder: (context, index) {
               final meal = meals[index];
-              return GestureDetector(
+              return MealCard(
+                meal: meal,
+                firebaseService: widget.firebaseService,
                 onTap: () async {
                   final detail = await api.fetchMealDetail(meal.id);
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (_) => MealDetailScreen(mealDetail: detail)),
+                    MaterialPageRoute(
+                      builder: (_) => MealDetailScreen(
+                        mealDetail: detail,
+                        firebaseService: widget.firebaseService,
+                      ),
+                    ),
                   );
                 },
-                child: MealCard(meal: meal),
               );
             },
           );

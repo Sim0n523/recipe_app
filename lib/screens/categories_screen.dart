@@ -1,11 +1,19 @@
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
+import '../services/firebase_service.dart';
 import '../models/category.dart';
 import '../widgets/category_card.dart';
 import 'meals_screen.dart';
 import 'meal_detail_screen.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import '../services/firebase_service.dart';
 
 class CategoriesScreen extends StatefulWidget {
+  final FirebaseService firebaseService;
+
+  const CategoriesScreen({Key? key, required this.firebaseService})
+      : super(key: key);
+
   @override
   _CategoriesScreenState createState() => _CategoriesScreenState();
 }
@@ -34,7 +42,10 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (_) => MealDetailScreen(mealDetail: randomMeal),
+                  builder: (_) => MealDetailScreen(
+                    mealDetail: randomMeal,
+                    firebaseService: widget.firebaseService,
+                  ),
                 ),
               );
             },
@@ -64,7 +75,8 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
         builder: (context, snapshot) {
           if (snapshot.connectionState != ConnectionState.done)
             return Center(child: CircularProgressIndicator());
-          if (snapshot.hasError) return Center(child: Text('Error: ${snapshot.error}'));
+          if (snapshot.hasError)
+            return Center(child: Text('Error: ${snapshot.error}'));
           final categories = snapshot.data!
               .where((c) => c.name.toLowerCase().contains(query.toLowerCase()))
               .toList();
@@ -76,7 +88,12 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
               return GestureDetector(
                 onTap: () => Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => MealsScreen(category: cat.name)),
+                  MaterialPageRoute(
+                    builder: (_) => MealsScreen(
+                      category: cat.name,
+                      firebaseService: widget.firebaseService,
+                    ),
+                  ),
                 ),
                 child: CategoryCard(category: cat),
               );
