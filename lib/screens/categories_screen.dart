@@ -5,8 +5,7 @@ import '../models/category.dart';
 import '../widgets/category_card.dart';
 import 'meals_screen.dart';
 import 'meal_detail_screen.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import '../services/firebase_service.dart';
+
 
 class CategoriesScreen extends StatefulWidget {
   final FirebaseService firebaseService;
